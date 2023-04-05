@@ -1,0 +1,44 @@
+body{
+    text-align: center;
+    align-items: center;
+    background-color: #FEFCF3;
+    display:grid;
+    grid-template-rows: 1fr 2fr auto auto auto 1fr;
+}
+
+form{
+    margin: 50px auto;
+}
+
+label{
+    font-weight:bolder;
+}
+input{
+    width: 200px;
+}
+
+button{
+    font-weight:bolder;
+    width:120px;
+    border-radius: 5px;
+    background-color: #181D31;
+    color: white;
+    margin-left: 10px;
+}
+.section{
+    margin: 50px 700px;
+}
+li{
+    margin-top: 10px;
+}
+div{
+    width:30%;
+    position:relative;
+    margin: 0 auto;
+}
+div h2{
+    position:relative;
+    margin: 0 auto;
+    background-color: #439A97;
+    border-radius: 5px;
+}

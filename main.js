@@ -1,85 +1,118 @@
 const priceInput=document.getElementById('price');
 const nameInput=document.getElementById('product');
-const list=document.getElementById('list');
+const categoryInput=document.getElementById('category');
+const fashionList=document.getElementById('fashionList');
+const foodList=document.getElementById('foodList');
+const electronicsList=document.getElementById('electronicsList');
 const totalVal=document.getElementById('totalVal');
 
 let tValue=0;
 
+async function init(){
 
-
-
-// init function to get the initial data already posted earlier and log it on the screen
-
-function init(){
-
-    axios.get(`https://crudcrud.com/api/d59777589b094862acbf3988f5cc8bdd/productData`)
-        .then(res=>res.data.forEach(logData))
-        .catch(err=>console.error(err));
-
-    // setTimeout so that tValue is logged for the calculated valued and not the initial values
-    setTimeout(()=>totalVal.appendChild(document.createTextNode(`Total worth value of products: ${tValue}`)),500);
+    try{
+        const res=await axios.get(`http://localhost:3000/product/get-products`);
+        console.log(res.data.resData);
+        res.data.resData.forEach(logData);
+        totalVal.appendChild(document.createTextNode(`Total value of products added: ${tValue}`));
+    }
+    catch(error){
+        console.error(error);
+    }
 
 }
-init();
+document.addEventListener("DOMContentLoaded",init);
+
+
 
 
 // submithandler to log the new data
-function submitHandler(e){
-    e.preventDefault();
+async function submitHandler(e){
+    try{
+        e.preventDefault();
+        const price=priceInput.value;
+        const name=nameInput.value;
+        const category=categoryInput.value;
 
-    const price=priceInput.value;
-    const name=nameInput.value;
-    
-    const data={
-        "price":price,
-        "name":name
+        const data={
+            "price":price,
+            "name":name,
+            "category":category
+        }
+        // posting the data on the route
+        const res=await axios.post(`http://localhost:3000/product/add-product`,data);
+        console.log(res);
+        window.location.reload();
     }
-
-    // posting the data on the route
-    axios.post(`https://crudcrud.com/api/d59777589b094862acbf3988f5cc8bdd/productData`,data)
-        .then(res=>logData(res.data))
-        .catch(err=>console.error(err));
-        
-    // after every new submission we are refreshing to load the new value of tValue
-    setTimeout(()=>window.location.reload(),500);
-    
+   catch(error){
+        console.error(error);
+   }
 }
+
+
 
 // logdata is used to log the individual set of data on the screen as a li
 function logData(element){
 
-    // extracting daat from the object
-    const price=element.price;
-    tValue+=Number(price);
-    const name=element.name;
-    const id=element._id;
+    // extracting data from the object
+        const price=element.price;
+        tValue+=Number(price);
+        const name=element.name;
+        const category=element.category;
+        const id=element.id;
 
-    // setting local storage
-    localStorage.setItem(id,element);
+        // // setting local storage
+        // localStorage.setItem(id,element);
 
-    // Creating li to be put in out ul
-    const li=document.createElement('li');
-    li.classList.add(id);
-    li.appendChild(document.createTextNode(`${price} - ${name} `));
-    
-    // Adding delete functionality on our li
-    const deleteB=document.createElement('button');
-
-    deleteB.onclick=()=>{
-        localStorage.removeItem(id);
-
-        axios.delete(`https://crudcrud.com/api/d59777589b094862acbf3988f5cc8bdd/productData/${id}`)
-            .then(res=>console.log(res))
-            .then(err=>console.error(err));
+        // Creating li to be put in out ul
+        const li=document.createElement('li');
+        li.classList.add(id);
+        li.appendChild(document.createTextNode(`${price} - ${name}`));
+        // Adding delete functionality on our li
+        const deleteB=document.createElement('button');
         
-            setTimeout(()=>{
+        deleteB.onclick=async () => {
+            try{
+                localStorage.removeItem(id);
+                const res=await axios.post(`http://localhost:3000/product/delete-product/${id}`);
+                // After deleting we need to refresh the page
                 window.location.reload();
-            },500);
-    }
-    deleteB.appendChild(document.createTextNode('Delete'));
-    li.appendChild(deleteB);
+            }
+            catch(error){
+                console.error(error);
+            }
 
-    list.appendChild(li);
+        }
+        deleteB.appendChild(document.createTextNode('Delete'));
+        li.appendChild(deleteB);
+
+        const editB=document.createElement('button');
+        editB.onclick=async () =>{
+            try{
+                const res=await axios.get(`http://localhost:3000/product/get-product/${id}`);
+                await axios.post(`http://localhost:3000/product/delete-product/${id}`);
+                const returnObj=res.data.resData;
+                priceInput.value=returnObj.price;
+                nameInput.value=returnObj.name;
+                categoryInput.value=returnObj.category;
 
 
+
+            }
+            catch(error){
+                console.log(error);
+            }
+
+        }
+        editB.appendChild(document.createTextNode('Edit'));
+        li.appendChild(editB);
+        if(category==='fashion'){
+            fashionList.appendChild(li);
+        }
+        else if(category==='food'){
+            foodList.appendChild(li);
+        }
+        else{
+            electronicsList.appendChild(li);
+        }
 }
